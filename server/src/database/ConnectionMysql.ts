@@ -4,18 +4,12 @@ import {
 } from "./data-select/InsertMysql";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
-import { z } from "zod";
 
 dotenv.config(); // Variáveis de ambiente
 
-const passSchema = z.object({
-  // O guiche que a senha está atribuído
-  passGuiche: z.string().max(10, {
-    message: "O guiche selecionado é inexistente",
-  }),
-});
-
-type passType = z.infer<typeof passSchema>; // Infere o tipo
+type PassType = {
+  PASS_TYPE: string;
+};
 
 export default class DataBase {
   private connected: mysql.Pool | null = null; // Tipo da conexão
@@ -45,17 +39,15 @@ export default class DataBase {
     }
   }
 
-  async insertPassClient(passClient: passType) {
-    const { passGuiche } = passSchema.parse(passClient);
-
+  async insertPassClient(passClient: PassType) {
     const connection = await this.connected!.getConnection();
     try {
       // Geração aleatória de senha e guichê com base no tipo de senha
-      const generatedPass = generateRandomPass(9); // Por exemplo, gerar uma senha de 8 caracteres
-      const generatedGuiche = generateRandomGuiche(passGuiche);
+      const generatedPass = await generateRandomPass(10); // Por exemplo, gerar uma senha de 8 caracteres
+      const generatedGuiche = await generateRandomGuiche("GUICHE");
       const passClientObjectInsert = [
         generatedPass,
-        passClient,
+        passClient.PASS_TYPE,
         generatedGuiche,
       ];
       const sqlInsert = "CALL CAD_PASS_CLIENT(?,?,?);";

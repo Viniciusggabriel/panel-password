@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "./App.css";
 // ShadcnUI
 import {
   Table,
@@ -19,14 +18,15 @@ type PassType = {
   PASS_GUICHE: string;
 };
 
-export default function App() {
+export const PanelViewSelect = () => {
   const [data, setData] = useState<PassType[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_URL_BACK}`);
+        const response = await axios.get(`${import.meta.env.VITE_URL_BACK_GET}`);
         const jsonData = response.data;
+        console.log(jsonData);
         setData(JSON.parse(jsonData));
       } catch (error) {
         console.error(error);
@@ -34,6 +34,9 @@ export default function App() {
     };
 
     fetchData();
+
+    const interval = setInterval(fetchData, 5000); // Faz uma nova requisição em intervalo de 5s
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -76,4 +79,4 @@ export default function App() {
       </TableBody>
     </Table>
   );
-}
+};
