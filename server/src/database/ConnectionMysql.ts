@@ -1,3 +1,7 @@
+import {
+  generateRandomGuiche,
+  generateRandomPass,
+} from "./data-select/InsertMysql";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import { z } from "zod";
@@ -5,17 +9,6 @@ import { z } from "zod";
 dotenv.config(); // Variáveis de ambiente
 
 const passSchema = z.object({
-  // Tamanho da senha
-  pass: z.string().min(6, {
-    message:
-      "Ouve um problema com a senha gerada, tem de ter no mínimo 6 dígitos",
-  }),
-
-  // Tipo da senha "Oftalmo, endocrinologista"
-  typePass: z
-    .string()
-    .max(30, { message: "O tipo da senha deve ter no máximo 20 caracteres" }),
-
   // O guiche que a senha está atribuído
   passGuiche: z.string().max(10, {
     message: "O guiche selecionado é inexistente",
@@ -39,7 +32,7 @@ export default class DataBase {
     }
   }
 
-  async FindPassClient() {
+  async findPassClient() {
     const connection = await this.connected!.getConnection();
     try {
       const [rows] = await connection.query("SELECT * FROM PANEL_PASS");
@@ -52,12 +45,19 @@ export default class DataBase {
     }
   }
 
-  async InsertPassClient(passClient: passType) {
-    const { pass, typePass, passGuiche } = passSchema.parse(passClient);
+  async insertPassClient(passClient: passType) {
+    const { passGuiche } = passSchema.parse(passClient);
 
     const connection = await this.connected!.getConnection();
     try {
-      const passClientObjectInsert = [pass, typePass, passGuiche];
+      // Geração aleatória de senha e guichê com base no tipo de senha
+      const generatedPass = generateRandomPass(9); // Por exemplo, gerar uma senha de 8 caracteres
+      const generatedGuiche = generateRandomGuiche(passGuiche);
+      const passClientObjectInsert = [
+        generatedPass,
+        passClient,
+        generatedGuiche,
+      ];
       const sqlInsert = "CALL CAD_PASS_CLIENT(?,?,?);";
       await connection.query(sqlInsert, passClientObjectInsert);
     } catch (error) {

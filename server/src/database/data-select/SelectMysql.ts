@@ -12,7 +12,7 @@ type PassType = {
 // Função do tipo Promise com a tipagem acima
 async function runDatabase(): Promise<PassType[]> {
   try {
-    const dataBaseResult = await database.FindPassClient(); // Chama o metodo de procurar as senhas
+    const dataBaseResult = await database.findPassClient(); // Chama o metodo de procurar as senhas
 
     if (Array.isArray(dataBaseResult)) {
       // Se for array ele mapeia e retorna um novo array tipado
@@ -36,7 +36,7 @@ async function runDatabase(): Promise<PassType[]> {
   }
 }
 
-export async function processData(): Promise<string> {
+export async function processDataSelect(): Promise<string> {
   try {
     const passes = await runDatabase();
     const jsonInfoPassPanel = JSON.stringify(passes);

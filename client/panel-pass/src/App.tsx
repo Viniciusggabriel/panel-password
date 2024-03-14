@@ -41,19 +41,28 @@ export default function App() {
       <TableCaption>Painel de senhas</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-center">Ordem</TableHead>
-          <TableHead className="text-center">Tipo</TableHead>
-          <TableHead className="text-center">Senha</TableHead>
-          <TableHead className="text-center">Guiche</TableHead>
+          <TableHead className="text-center text-xl text-white bg-neutral-700">
+            Tipo
+          </TableHead>
+          <TableHead className="text-center text-xl text-white bg-neutral-700">
+            Senha
+          </TableHead>
+          <TableHead className="text-center text-xl text-white bg-neutral-700">
+            Guiche
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {data.length > 0 ? (
-          data.map((item) => (
+          data.map((item, index) => (
             <TableRow key={item.ID_PASS}>
-              <TableCell className="text-center">{item.ID_PASS}</TableCell>
               <TableCell className="text-center">{item.PASS_TYPE}</TableCell>
-              <TableCell className="text-center">{item.PASS}</TableCell>
+              <TableCell
+                className="text-center text-xl text-white rounded-md bg-red-700"
+                id={`item-table-${index}`}
+              >
+                {item.PASS}
+              </TableCell>
               <TableCell className="text-center">{item.PASS_GUICHE}</TableCell>
             </TableRow>
           ))
