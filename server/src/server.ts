@@ -1,9 +1,12 @@
 import http from "node:http";
-import { processDataSelect } from "./database/data-select/SelectMysql";
+import { processDataSelect } from "./database/controller/SelectMysql";
 import DataBase from "./database/ConnectionMysql";
 
 type PassType = {
+  ID_PASS: number;
+  PASS: string;
   PASS_TYPE: string;
+  PASS_GUICHE: string;
 };
 
 const PORT = 8080;
@@ -14,31 +17,33 @@ const server = http.createServer(async (request, response) => {
       case "/panel/view":
         await handleViewRequest(response);
         break;
-      case "/panel/view":
-        await handleSubmitRequest(request, response);
-        break;
       case "/panel/submit":
         if (request.method === "POST") {
-          // Código para lidar com a solicitação de envio...
+          await handleSubmitRequest(request, response);
         } else if (request.method === "OPTIONS") {
-          // Responder à solicitação OPTIONS com os cabeçalhos CORS adequados
+          // O options é necessário para quando um outro domínio vai fazer uma requisição de qualquer outro tipo além do GET
           response.writeHead(200, {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST",
+            "Access-Control-Allow-Methods": "POST",
             "Access-Control-Allow-Headers": "Content-Type",
           });
           response.end();
-          return; // Encerra o processamento da requisição OPTIONS aqui
+          return;
+        } else {
+          response.writeHead(405, { "Content-Type": "text/plain" });
+          response.end("Método escolhido não é permitido");
+          return;
         }
         break;
+
       default:
         response.writeHead(404, { "Content-Type": "text/plain" });
-        response.end("Not Found");
+        response.end("Não existe");
     }
   } catch (error) {
     console.error("Ocorreu um erro ao acessar o servidor HTTP: ", error);
     response.writeHead(500, { "Content-Type": "text/plain" });
-    response.end("Internal Server Error");
+    response.end("Erro interno no server");
   }
 });
 
@@ -53,36 +58,37 @@ async function handleViewRequest(response: http.ServerResponse) {
   });
   response.end(JSON.stringify(resultsSelect));
 }
-
 async function handleSubmitRequest(
   request: http.IncomingMessage,
   response: http.ServerResponse
 ) {
-  if (request.method !== "POST") {
-    response.writeHead(405, { "Content-Type": "text/plain" });
-    response.end("Method Not Allowed");
-    return;
-  }
+  response.writeHead(200, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST",
+    "Access-Control-Allow-Headers": "Content-Type",
+  });
 
-  let body: PassType = { PASS_TYPE: "" };
+  let body: Uint8Array[] = [];
 
   request.on("data", (chunk) => {
-    body = JSON.parse(chunk);
+    body.push(chunk);
   });
 
   request.on("end", async () => {
     try {
-      console.log("🤓 Dados recebidos ", body);
+      const data = Buffer.concat(body).toString();
+      const parsedBody: PassType = JSON.parse(data);
+      console.log("🤓 Dados recebidos ", parsedBody);
 
       const dataBase = new DataBase();
-      await dataBase.insertPassClient(body);
+      await dataBase.insertPassClient(parsedBody);
 
-      response.writeHead(200, { "Content-Type": "application/json" });
       response.end(JSON.stringify({ message: "Dados recebidos com sucesso!" }));
     } catch (error) {
       console.error("Erro ao processar solicitação de envio: ", error);
       response.writeHead(500, { "Content-Type": "text/plain" });
-      response.end("Internal Server Error");
+      response.end("Erro interno do servidor");
     }
   });
 }

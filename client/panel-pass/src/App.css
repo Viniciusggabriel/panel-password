@@ -75,6 +75,6 @@
   }
 }
 
-#item-table-0 {
-  background-color: blue;
+html {
+  overflow: hidden;
 }

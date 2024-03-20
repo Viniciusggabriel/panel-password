@@ -1,14 +1,13 @@
-import {
-  generateRandomGuiche,
-  generateRandomPass,
-} from "./data-select/InsertMysql";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 
 dotenv.config(); // Variáveis de ambiente
 
 type PassType = {
+  ID_PASS: number;
+  PASS: string;
   PASS_TYPE: string;
+  PASS_GUICHE: string;
 };
 
 export default class DataBase {
@@ -42,13 +41,11 @@ export default class DataBase {
   async insertPassClient(passClient: PassType) {
     const connection = await this.connected!.getConnection();
     try {
-      // Geração aleatória de senha e guichê com base no tipo de senha
-      const generatedPass = await generateRandomPass(10); // Por exemplo, gerar uma senha de 8 caracteres
-      const generatedGuiche = await generateRandomGuiche("GUICHE");
+    
       const passClientObjectInsert = [
-        generatedPass,
+        passClient.PASS,
         passClient.PASS_TYPE,
-        generatedGuiche,
+        passClient.PASS_GUICHE,
       ];
       const sqlInsert = "CALL CAD_PASS_CLIENT(?,?,?);";
       await connection.query(sqlInsert, passClientObjectInsert);

@@ -4,12 +4,18 @@ import axios from "axios";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type PassType = {
   ID_PASS: number;
@@ -24,9 +30,10 @@ export const PanelViewSelect = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_URL_BACK_GET}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_URL_BACK_GET}`
+        );
         const jsonData = response.data;
-        console.log(jsonData);
         setData(JSON.parse(jsonData));
       } catch (error) {
         console.error(error);
@@ -39,44 +46,65 @@ export const PanelViewSelect = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const firstPass = data.length > 0 ? data[0] : null;
+
   return (
-    <Table>
-      <TableCaption>Painel de senhas</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="text-center text-xl text-white bg-neutral-700">
-            Tipo
-          </TableHead>
-          <TableHead className="text-center text-xl text-white bg-neutral-700">
-            Senha
-          </TableHead>
-          <TableHead className="text-center text-xl text-white bg-neutral-700">
-            Guiche
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.length > 0 ? (
-          data.map((item, index) => (
-            <TableRow key={item.ID_PASS}>
-              <TableCell className="text-center">{item.PASS_TYPE}</TableCell>
-              <TableCell
-                className="text-center text-xl text-white rounded-md bg-red-700"
-                id={`item-table-${index}`}
-              >
-                {item.PASS}
-              </TableCell>
-              <TableCell className="text-center">{item.PASS_GUICHE}</TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={4} className="text-center">
-              Carregando dados...
-            </TableCell>
-          </TableRow>
+    <section className="flex">
+      <Card className="w-3/5 border-none rounded-none flex flex-col align-middle items-center text-white bg-neutral-700">
+        {firstPass && (
+          <>
+            <CardHeader>
+              <CardTitle className="text-center text-[50px]">
+                <span>Senha:</span> {firstPass.PASS}
+              </CardTitle>
+              <CardDescription className="text-center text-[30px] pb-5 text-white">
+                <span>Tipo:</span> {firstPass.PASS_TYPE}
+              </CardDescription>
+              <hr />
+            </CardHeader>
+
+            <CardContent>
+              <p className="text-center text-[30px]">{firstPass.PASS_GUICHE}</p>
+            </CardContent>
+          </>
         )}
-      </TableBody>
-    </Table>
+      </Card>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-center text-xl text-white bg-neutral-700">
+              Tipo
+            </TableHead>
+            <TableHead className="text-center text-xl text-white bg-neutral-700">
+              Senha
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="border-b-4 border-neutral-700">
+          {data.length > 0 ? (
+            data.slice(1, 9).map((item, index) => (
+              <TableRow key={item.ID_PASS}>
+                <TableCell className="text-center py-6 text-[35px]">
+                  {item.PASS_TYPE}
+                </TableCell>
+                <TableCell
+                  className="text-center py-6 text-[35px]"
+                  id={`item-table-${index}`}
+                >
+                  {item.PASS}
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center">
+                Carregando dados...
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </section>
   );
 };
